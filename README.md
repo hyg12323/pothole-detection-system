@@ -1,147 +1,160 @@
-# Pothole Detection Project (포트홀 탐지 시스템)
+🚗 Automobile Accident Analysis & Impact Prediction System
+자동차 사고 분석 및 사고 영향 예측 시스템
 1. 프로젝트 개요
 
-본 프로젝트는 도로 포트홀(Pothole)을 자동으로 탐지하는 AI 기반 웹 서비스를 개발하는 것을 목표로 한다.
-사용자가 도로 사진을 업로드하면, YOLO 기반 객체 탐지 모델을 통해 포트홀 여부를 분석하고 결과를 웹 화면으로 제공한다.
+본 프로젝트는 자동차 사고 이미지 및 사고 상황 데이터를 기반으로
+사고 유형을 분석하고, 차량 파손 상태를 인식하며,
+이를 종합해 사고 영향 및 주행 가능 여부를 예측하는
+AI 기반 사고 분석 시스템을 개발하는 것을 목표로 한다.
 
-본 프로젝트는 AI 모델 서버(Python) 와 웹 서비스 서버(Java) 를 분리한 구조로 설계하여,
-실무에서 사용되는 AI + 웹 서비스 아키텍처를 경험하는 데 목적이 있다.
+본 시스템은 단일 모델이 아닌,
+여러 개의 AI 모델을 역할별로 분리하여 구성한 것이 특징이며,
+각 모델의 분석 결과를 종합하여 하나의 사고 분석 결과를 제공한다.
 
-2. 프로젝트 주제
+2. 프로젝트 전체 목표 (상위 개념)
 
-주제: YOLO 기반 포트홀(Pothole) 탐지 시스템
+주제
 
-핵심 기능
+AI 기반 자동차 사고 분석 및 사고 영향 예측 시스템
 
-도로 이미지 업로드
+시스템이 다루는 사고 분석 영역
 
-포트홀 탐지 여부 분석
+사고 유형 분류
 
-탐지 결과(존재 여부, 신뢰도 등) 시각화
+차량 파손 부위 탐지
 
-분석 결과 데이터 저장 및 조회
+사고 후 주행 가능 여부 예측
 
-3. 기술 스택 (Tech Stack)
-🔹 AI / Backend (Model Server)
+3. 시스템 내 AI 모델 구성
+
+본 프로젝트는 총 3개의 AI 분석 모듈로 구성된다.
+
+① 사고 유형 분류 모델
+
+입력: 사고 차량 이미지
+
+출력: 충돌 유형(전면 / 측면 / 후면 등)
+
+역할: 사고 상황 이해
+
+② 차량 파손 부위 탐지 모델 (본인이 담당한 모델)
+
+입력: 사고 차량 이미지
+
+출력: 파손 부위(Bumper, Door, Light 등) + Bounding Box
+
+역할: 차량 손상 상태 정밀 분석
+
+③ 주행 가능 여부 예측 모델
+
+입력: 사고 유형 + 파손 부위 정보
+
+출력: 주행 가능 / 점검 필요 / 운행 불가
+
+역할: 사고 영향 판단
+
+4. 내가 담당한 영역 (핵심)
+🔹 차량 파손 부위 탐지 AI 모델
+
+본인은 본 프로젝트에서
+YOLO 기반 차량 파손 부위 탐지 모델의 설계·학습·서빙을 담당하였다.
+
+주요 구현 내용
+
+YOLO 기반 객체 탐지 모델 학습
+
+차량 파손 부위 8개 클래스 탐지
+
+클래스별 Confidence Threshold 적용
+
+파손 부위 Bounding Box 시각화
+
+FastAPI 기반 AI 추론 서버 구현
+
+Docker 기반 모델 서버 컨테이너화
+
+5. 기술 스택 (Tech Stack)
+🔹 AI / Model Server
 
 Language: Python
 
 Model: YOLO (Object Detection)
 
-Framework: FastAPI 또는 Flask
+Framework: FastAPI
 
-역할
-
-포트홀 탐지 모델 학습
-
-이미지 추론(Inference)
-
-REST API 형태로 분석 결과 제공
+Libraries: Ultralytics, OpenCV, NumPy
 
 🔹 Web Backend
 
 Language: Java
 
-Framework: Spring (Spring Boot)
+Framework: Spring Boot
 
 Server: Tomcat
 
-Container: Docker
-
-역할
-
-사용자 요청 처리
-
-이미지 업로드 관리
-
-Python AI 서버와 통신
-
-DB 연동 및 결과 저장
-
 🔹 Frontend
 
-Language: HTML, CSS, JavaScript
-
 Framework: Vue.js
-
-역할
-
-사용자 UI 제공
-
-이미지 업로드 화면
-
-분석 결과 시각화
 
 🔹 Database
 
 DB: MongoDB
 
-역할
-
-이미지 분석 결과 저장
-
-포트홀 탐지 이력 관리
-
-JSON 기반 비정형 데이터 관리
-
-🔹 DevOps / Environment
+🔹 DevOps
 
 Containerization: Docker
 
-구성
-
-Java(Tomcat) 컨테이너
-
-Python(AI 서버) 컨테이너
-
-MongoDB 컨테이너
-
-4. 시스템 아키텍처 개요
+6. 시스템 아키텍처
 [Client (Browser)]
         ↓
 [Vue Frontend]
         ↓
-[Java / Spring / Tomcat]
+[Java / Spring]
         ↓
-[Python YOLO API Server]
+ ┌─────────────── AI Analysis Layer ───────────────┐
+ │ ① 사고 유형 분류 모델                          │
+ │ ② 차량 파손 부위 탐지 모델 (YOLO)               │
+ │ ③ 주행 가능 여부 예측 모델                      │
+ └─────────────────────────────────────────────────┘
         ↓
 [MongoDB]
 
+7. 사고 파손 탐지 모델 동작 흐름
 
-AI 모델과 웹 서버를 분리하여 확장성과 유지보수성을 고려한 구조
+사용자가 사고 차량 이미지 업로드
 
-REST API 기반의 서버 간 통신
+Java 서버가 이미지를 AI 서버로 전달
 
-5. 주요 기능 흐름
+YOLO 모델이 파손 부위 탐지 수행
 
-사용자가 웹에서 도로 이미지를 업로드
+파손 부위 Bounding Box 및 Confidence 반환
 
-Java 서버가 이미지 요청을 Python AI 서버로 전달
+결과를 상위 사고 분석 로직에 전달
 
-YOLO 모델이 포트홀 탐지 수행
+8. 프로젝트의 특징
 
-탐지 결과(JSON)를 Java 서버로 반환
+사고 분석을 단일 모델이 아닌 다중 AI 모델 구조로 설계
 
-결과를 MongoDB에 저장
+AI 모델과 웹 서버 완전 분리
 
-분석 결과를 웹 화면에 표시
+REST API 기반 모델 서빙
 
-6. 기대 효과
+Docker 기반 재현 가능한 실행 환경
 
-AI 객체 탐지(YOLO) 실전 적용 경험
+확장 가능한 사고 분석 파이프라인
 
-Python + Java 기반의 이종 언어 서버 연동 경험
+9. 향후 확장 방향
 
-Docker 기반 서비스 구성 경험
+파손 부위 조합 기반 수리 비용 예측
 
-실제 도로 안전 문제를 해결하는 실용적인 AI 서비스 구현
+GPT API 연동을 통한 사고 분석 설명 자동 생성
 
-7. 향후 확장 방향 (예정)
+사고 데이터 누적 기반 통계 분석
 
-포트홀 위치 좌표(Bounding Box) 시각화
+클라우드 환경 배포 및 확장
 
-탐지 결과 통계 대시보드
+10. 요약
 
-다중 이미지 일괄 분석 기능
-
-클라우드 환경 배포
+본 프로젝트는
+자동차 사고를 다각도로 분석하는 AI 기반 사고 분석 시스템이며,
+그중 차량 파손 부위 탐지 모델은 핵심 분석 모듈 중 하나이다.
