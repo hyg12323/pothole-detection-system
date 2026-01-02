@@ -26,7 +26,7 @@ AI 모델 서버 (Python, FastAPI)
 
 웹 서버 (Java, Spring Boot)
 
-프론트엔드 (Vue.js)
+프론트엔드 (React + vite)
 
 데이터 저장소 (MongoDB)
 
