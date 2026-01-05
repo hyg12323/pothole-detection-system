@@ -7,7 +7,15 @@ from PIL import Image
 # 설정
 # =========================
 IMG_SIZE = 224
-CLASS_NAMES = ["accident", "normal"]
+
+CLASS_NAMES = [
+    "convertible",
+    "coupe",
+    "hatchback",
+    "pickuptruck",
+    "sedan",
+    "suv"
+]
 
 BASE_DIR = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(
@@ -15,7 +23,7 @@ MODEL_PATH = os.path.join(
     "..",
     "..",
     "models",
-    "accident_model.onnx"
+    "vehicle_model.onnx"
 )
 
 # =========================
@@ -38,17 +46,17 @@ def _preprocess_image(img_path: str) -> np.ndarray:
     return x
 
 # =========================
-# 사고 여부 예측
+# 차종 예측
 # =========================
-def predict_accident(img_path: str, threshold: float = 0.5) -> dict:
+def predict_vehicle_type(img_path: str) -> dict:
     x = _preprocess_image(img_path)
 
     probs = session.run(None, {input_name: x})[0][0]
-    accident_prob = float(probs[0])  # 0번 = accident
+    idx = int(np.argmax(probs))
 
     return {
-        "is_accident": accident_prob >= threshold,
-        "confidence": accident_prob,
+        "vehicle_type": CLASS_NAMES[idx],
+        "confidence": float(probs[idx]),
         "probabilities": {
             CLASS_NAMES[i]: float(probs[i])
             for i in range(len(CLASS_NAMES))
